@@ -9,7 +9,7 @@ require("dotenv").config();
 const app: Express = express();
 const PORT = process.env.PORT || 4000;
 const logger = morgan(process.env.PORT ? "short" : "dev");
-const client = new PrismaClient();
+export const client = new PrismaClient();
 
 const handleListening = (): void => console.log(`Server Listening on: http://localhost:${PORT}`);
 
