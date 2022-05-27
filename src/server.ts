@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import express, { Express } from "express";
 import morgan from "morgan";
+import { checkUser } from "./middlewares";
 import articleRouter from "./routers/articleRouter";
 import commentRouter from "./routers/commentRouter";
 import userRouter from "./routers/userRouter";
@@ -14,6 +15,7 @@ export const client = new PrismaClient();
 const handleListening = (): void => console.log(`Server Listening on: http://localhost:${PORT}`);
 
 app.use(logger);
+app.use(checkUser);
 app.use("/user", userRouter);
 app.use("/article", articleRouter);
 app.use("/comment", commentRouter);

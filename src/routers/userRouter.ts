@@ -1,7 +1,6 @@
 import { getPrismaClient } from "@prisma/client/runtime";
 import express, { Request, Response, Router } from "express";
 import { deleteUser, loginUser, readUser, updateUser } from "../controllers/userController";
-import { checkUser } from "../middlewares";
 
 const userRouter: Router = express.Router();
 
