@@ -1,11 +1,14 @@
-/*
-  Warnings:
+-- CreateTable
+CREATE TABLE "Article" (
+    "id" SERIAL NOT NULL,
+    "title" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "userId" INTEGER NOT NULL,
 
-  - Added the required column `userId` to the `Article` table without a default value. This is not possible if the table is not empty.
-
-*/
--- AlterTable
-ALTER TABLE "Article" ADD COLUMN     "userId" INTEGER NOT NULL;
+    CONSTRAINT "Article_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "User" (
