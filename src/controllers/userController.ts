@@ -4,86 +4,113 @@ import { client } from "../server";
 
 export const loginUser = async (req: Request, res: Response) => {
   const { code } = req.body;
-
-  const {
-    data: { access_token },
-  } = await axios.post(
-    `https://oauth2.googleapis.com/token?code=${code}&client_id=${process.env.GOOGLE_CLIENT_ID}&client_secret=${process.env.GOOGLE_CLIENT_PASSWORD}&redirect_uri=http://localhost:3000&grant_type=authorization_code`,
-    {
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-    },
-    { withCredentials: true }
-  );
-
-  const {
-    data: { email },
-  } = await axios.get(
-    `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${access_token}`,
-    {
-      headers: {
-        authorization: `token ${access_token}`,
-        accept: "application/json",
+  try {
+    const {
+      data: { access_token },
+    } = await axios.post(
+      `https://oauth2.googleapis.com/token?code=${code}&client_id=${process.env.GOOGLE_CLIENT_ID}&client_secret=${process.env.GOOGLE_CLIENT_PASSWORD}&redirect_uri=http://localhost:3000&grant_type=authorization_code`,
+      {
+        headers: { "content-type": "application/x-www-form-urlencoded" },
       },
-    }
-  );
+      { withCredentials: true }
+    );
 
-  let userInfo = await client.user.findUnique({
-    where: { email },
-  });
+    const {
+      data: { email },
+    } = await axios.get(
+      `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${access_token}`,
+      {
+        headers: {
+          authorization: `token ${access_token}`,
+          accept: "application/json",
+        },
+      }
+    );
 
-  if (!userInfo) {
-    const nickname = Math.random()
-      .toString(36)
-      .replace(/[^a-z]+/g, "")
-      .substr(0, 5);
-
-    await client.user.create({
-      data: { email, nickname },
+    let userInfo = await client.user.findUnique({
+      where: { email },
     });
-  }
 
-  return res.json({ token: access_token });
+    if (!userInfo) {
+      const nickname = Math.random()
+        .toString(36)
+        .replace(/[^a-z]+/g, "")
+        .substr(0, 5);
+
+      await client.user.create({
+        data: { email, nickname },
+      });
+    }
+
+    return res.json({ token: access_token });
+  } catch {
+    return res.json({ token: false });
+  }
 };
 
 export const readUser = async (req: Request, res: Response) => {
-  return res.json({ userInfo: res.locals.userInfo });
+  try {
+    return res.json({ userInfo: res.locals.userInfo });
+  } catch {
+    return res.json({ userInfo: false });
+  }
 };
 
 export const deleteUser = async (req: Request, res: Response) => {
-  let deleteUser = await client.user.delete({
-    where: { email: res.locals.userInfo.email },
-  });
+  try {
+    let deleteUser = await client.user.delete({
+      where: { email: res.locals.userInfo.email },
+    });
 
-  return res.json({ deleteUser });
+    return res.json({ deleteUser });
+  } catch {
+    return res.json({ deleteUser: false });
+  }
 };
 
-export const updateUser = (req: Request, res: Response) => {
-  return res.json("Update User!");
+export const updateUser = async (req: Request, res: Response) => {
+  const { nickname } = req.body;
+  try {
+    let updatedUser = await client.user.update({
+      where: {
+        id: res.locals.userInfo.id,
+      },
+      data: {
+        nickname,
+      },
+    });
+    return res.json({ updatedUser });
+  } catch {
+    return res.json({ updatedUser: false });
+  }
 };
 
 export const likeArticle = async (req: Request, res: Response) => {
   const { articleId } = req.body;
+  try {
+    let userInfo = res.locals.userInfo;
 
-  let userInfo = res.locals.userInfo;
-
-  if (userInfo) {
-    const liked = await client.like.findMany({
-      where: { userId: userInfo.id, articleId },
-    });
-
-    if (liked.length) {
-      await client.like.deleteMany({ where: { userId: userInfo.id, articleId } });
-
-      return res.json({ like: true });
-    } else {
-      await client.like.create({
-        data: {
-          article: { connect: { id: articleId } },
-          user: { connect: { id: userInfo.id } },
-        },
+    if (userInfo) {
+      const liked = await client.like.findMany({
+        where: { userId: userInfo.id, articleId },
       });
 
-      return res.json({ like: true });
+      if (liked.length) {
+        await client.like.deleteMany({ where: { userId: userInfo.id, articleId } });
+
+        return res.json({ like: true });
+      } else {
+        await client.like.create({
+          data: {
+            article: { connect: { id: articleId } },
+            user: { connect: { id: userInfo.id } },
+          },
+        });
+
+        return res.json({ like: true });
+      }
     }
+  } catch {
+    return res.json({ like: false });
   }
 };

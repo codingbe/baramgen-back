@@ -5,6 +5,8 @@ import { checkUser } from "./middlewares";
 import articleRouter from "./routers/articleRouter";
 import commentRouter from "./routers/commentRouter";
 import userRouter from "./routers/userRouter";
+import cors from "cors";
+
 require("dotenv").config();
 
 const app: Express = express();
@@ -13,6 +15,15 @@ const logger = morgan(process.env.PORT ? "short" : "dev");
 export const client = new PrismaClient();
 
 const handleListening = (): void => console.log(`Server Listening on: http://localhost:${PORT}`);
+app.use(express.json());
+
+app.use(
+  cors({
+    origin: true,
+    methods: ["GET", "POST", "DELETE", "PUT", "PATCH", "OPTIONS"],
+    credentials: true,
+  })
+);
 
 app.use(logger);
 app.use(checkUser);
