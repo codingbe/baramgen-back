@@ -27,8 +27,8 @@ app.use(
 
 app.use(logger);
 app.use(checkUser);
-app.use("/user", userRouter);
-app.use("/article", articleRouter);
-app.use("/comment", commentRouter);
+app.use("/users", userRouter);
+app.use("/articles", articleRouter);
+app.use("/comments", commentRouter);
 
 app.listen(PORT, handleListening);

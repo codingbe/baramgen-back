@@ -70,19 +70,16 @@ export const readArticle = async (req: Request, res: Response) => {
 export const searchArticle = async (req: Request, res: Response) => {
   const { type, value } = req.query;
   try {
-    const article = await client.article.findMany({
-      orderBy: {
-        id: "desc",
-      },
-    });
-
-    const searcher = new FuzzySearch(article, [type as string], {
-      caseSensitive: true,
-    });
-
-    const result = searcher.search(value as string);
-
-    return res.json({ result });
+    // const article = await client.article.findMany({
+    //   orderBy: {
+    //     id: "desc",
+    //   },
+    // });
+    // const searcher = new FuzzySearch(article, [type as string], {
+    //   caseSensitive: true,
+    // });
+    // const result = searcher.search(value as string);
+    // return res.json({ result });
   } catch {
     return res.json({ result: false });
   }
