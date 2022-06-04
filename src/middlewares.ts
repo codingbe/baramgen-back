@@ -22,7 +22,7 @@ export const checkUser = async (req: Request, res: Response, next: NextFunction)
       res.locals.userInfo = userInfo;
     } catch {
       // 토큰 유효기간이 끝났을때
-      return res.json({ userInfo: false });
+      return res.json({ userInfo: null });
     }
   }
   next();

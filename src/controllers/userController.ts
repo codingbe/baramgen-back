@@ -41,7 +41,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
     return res.json({ token: access_token });
   } catch {
-    return res.json({ token: false });
+    return res.json({ token: null });
   }
 };
 
@@ -49,19 +49,19 @@ export const readUser = async (req: Request, res: Response) => {
   try {
     return res.json({ userInfo: res.locals.userInfo });
   } catch {
-    return res.json({ userInfo: false });
+    return res.json({ userInfo: null });
   }
 };
 
 export const deleteUser = async (req: Request, res: Response) => {
   try {
-    let deleteUser = await client.user.delete({
+    await client.user.delete({
       where: { email: res.locals.userInfo.email },
     });
 
-    return res.json({ deleteUser });
+    return res.json({ ok: true });
   } catch {
-    return res.json({ deleteUser: false });
+    return res.json({ ok: false });
   }
 };
 
@@ -78,36 +78,6 @@ export const updateUser = async (req: Request, res: Response) => {
     });
     return res.json({ userInfo: updatedUser });
   } catch {
-    return res.json({ userInfo: false });
-  }
-};
-
-export const likeArticle = async (req: Request, res: Response) => {
-  const { articleId } = req.body;
-  try {
-    let userInfo = res.locals.userInfo;
-
-    if (userInfo) {
-      const liked = await client.like.findMany({
-        where: { userId: userInfo.id, articleId },
-      });
-
-      if (liked.length) {
-        await client.like.deleteMany({ where: { userId: userInfo.id, articleId } });
-
-        return res.json({ like: true });
-      } else {
-        await client.like.create({
-          data: {
-            article: { connect: { id: articleId } },
-            user: { connect: { id: userInfo.id } },
-          },
-        });
-
-        return res.json({ like: true });
-      }
-    }
-  } catch {
-    return res.json({ like: false });
+    return res.json({ userInfo: null });
   }
 };

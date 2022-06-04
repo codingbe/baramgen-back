@@ -7,7 +7,7 @@ export const createArticle = async (req: Request, res: Response) => {
   try {
     const userInfo = res.locals.userInfo;
 
-    const createdArticle = await client.article.create({
+    const article = await client.article.create({
       data: {
         title,
         content,
@@ -19,16 +19,16 @@ export const createArticle = async (req: Request, res: Response) => {
       },
     });
 
-    return res.json({ createdArticle });
+    return res.json(article);
   } catch {
-    return res.json({ createdArticle: false });
+    return res.json({ article: null });
   }
 };
 
 export const updateArticle = async (req: Request, res: Response) => {
   const { id, title, content } = req.body;
   try {
-    const updatedArticle = await client.article.update({
+    const article = await client.article.update({
       where: { id },
       data: {
         title,
@@ -36,51 +36,81 @@ export const updateArticle = async (req: Request, res: Response) => {
       },
     });
 
-    return res.json({ updatedArticle });
+    return res.json(article);
   } catch {
-    return res.json({ updatedArticle: false });
+    return res.json({ article: null });
   }
 };
 
 export const deleteArticle = async (req: Request, res: Response) => {
   const { id } = req.body;
   try {
-    const deletedArticle = await client.article.delete({
+    await client.article.delete({
       where: { id },
     });
 
-    return res.json({ deletedArticle });
+    return res.json({ ok: true });
   } catch {
-    return res.json({ deletedArticle: false });
+    return res.json({ ok: false });
   }
 };
 
 export const readArticle = async (req: Request, res: Response) => {
   const { id } = req.body;
   try {
-    const findedArticle = await client.article.findUnique({
+    const article = await client.article.findUnique({
       where: { id },
     });
-    return res.json({ findedArticle });
+    return res.json(article);
   } catch {
-    return res.json({ findedArticle: false });
+    return res.json({ article: null });
   }
 };
 
 export const searchArticle = async (req: Request, res: Response) => {
   const { type, value } = req.query;
   try {
-    // const article = await client.article.findMany({
-    //   orderBy: {
-    //     id: "desc",
-    //   },
-    // });
-    // const searcher = new FuzzySearch(article, [type as string], {
-    //   caseSensitive: true,
-    // });
-    // const result = searcher.search(value as string);
-    // return res.json({ result });
+    const article = await client.article.findMany({
+      orderBy: {
+        id: "desc",
+      },
+    });
+    const searcher = new FuzzySearch(article, [type as string], {
+      caseSensitive: true,
+    });
+    const result = searcher.search(value as string);
+    return res.json({ articles: result });
   } catch {
-    return res.json({ result: false });
+    return res.json({ articles: null });
+  }
+};
+
+export const likeArticle = async (req: Request, res: Response) => {
+  const { articleId } = req.body;
+  try {
+    let userInfo = res.locals.userInfo;
+
+    if (userInfo) {
+      const liked = await client.like.findMany({
+        where: { userId: userInfo.id, articleId },
+      });
+
+      if (liked.length) {
+        await client.like.deleteMany({ where: { userId: userInfo.id, articleId } });
+
+        return res.json({ like: true });
+      } else {
+        await client.like.create({
+          data: {
+            article: { connect: { id: articleId } },
+            user: { connect: { id: userInfo.id } },
+          },
+        });
+
+        return res.json({ like: true });
+      }
+    }
+  } catch {
+    return res.json({ like: false });
   }
 };
