@@ -6,6 +6,8 @@ import articleRouter from "./routers/articleRouter";
 import commentRouter from "./routers/commentRouter";
 import userRouter from "./routers/userRouter";
 import cors from "cors";
+import bossRouter from "./routers/bossRouter";
+import fetchRouter from "./routers/fetchRouter";
 
 require("dotenv").config();
 
@@ -27,8 +29,10 @@ app.use(
 
 app.use(logger);
 app.use(checkUser);
-app.use("/user", userRouter);
-app.use("/article", articleRouter);
-app.use("/comment", commentRouter);
+app.use("/users", userRouter);
+app.use("/articles", articleRouter);
+app.use("/comments", commentRouter);
+app.use("/bosses", bossRouter);
+app.use("/fetch", fetchRouter);
 
 app.listen(PORT, handleListening);

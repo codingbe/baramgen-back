@@ -8,7 +8,7 @@ export const loginUser = async (req: Request, res: Response) => {
     const {
       data: { access_token },
     } = await axios.post(
-      `https://oauth2.googleapis.com/token?code=${code}&client_id=${process.env.GOOGLE_CLIENT_ID}&client_secret=${process.env.GOOGLE_CLIENT_PASSWORD}&redirect_uri=http://localhost:3000&grant_type=authorization_code`,
+      `https://oauth2.googleapis.com/token?code=${code}&client_id=${process.env.GOOGLE_CLIENT_ID}&client_secret=${process.env.GOOGLE_CLIENT_PASSWORD}&redirect_uri=http://localhost:3000/signin&grant_type=authorization_code`,
       {
         headers: { "content-type": "application/x-www-form-urlencoded" },
       },
@@ -16,16 +16,13 @@ export const loginUser = async (req: Request, res: Response) => {
     );
 
     const {
-      data: { email },
-    } = await axios.get(
-      `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${access_token}`,
-      {
-        headers: {
-          authorization: `token ${access_token}`,
-          accept: "application/json",
-        },
-      }
-    );
+      data: { email, picture: img },
+    } = await axios.get(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${access_token}`, {
+      headers: {
+        authorization: `token ${access_token}`,
+        accept: "application/json",
+      },
+    });
 
     let userInfo = await client.user.findUnique({
       where: { email },
@@ -38,7 +35,7 @@ export const loginUser = async (req: Request, res: Response) => {
         .substr(0, 5);
 
       await client.user.create({
-        data: { email, nickname },
+        data: { email, nickname, img },
       });
     }
 
@@ -79,9 +76,9 @@ export const updateUser = async (req: Request, res: Response) => {
         nickname,
       },
     });
-    return res.json({ updatedUser });
+    return res.json({ userInfo: updatedUser });
   } catch {
-    return res.json({ updatedUser: false });
+    return res.json({ userInfo: false });
   }
 };
 
