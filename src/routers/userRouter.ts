@@ -1,5 +1,4 @@
-import { getPrismaClient } from "@prisma/client/runtime";
-import express, { Request, Response, Router } from "express";
+import express, { Router } from "express";
 import { deleteUser, loginUser, readUser, updateUser } from "../controllers/userController";
 
 const userRouter: Router = express.Router();
