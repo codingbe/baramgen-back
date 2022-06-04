@@ -2,8 +2,9 @@ import express, { Router } from "express";
 import {
   createArticle,
   deleteArticle,
-  likeArticle,
+  // likeArticle,
   readArticle,
+  readArticles,
   searchArticle,
   updateArticle,
 } from "../controllers/articleController";
@@ -14,7 +15,8 @@ articleRouter.post("/", createArticle);
 articleRouter.patch("/", updateArticle);
 articleRouter.delete("/", deleteArticle);
 articleRouter.get("/search", searchArticle);
-articleRouter.get("/", readArticle);
-articleRouter.patch("/like", likeArticle);
+articleRouter.get("/:id", readArticle);
+articleRouter.get("/", readArticles);
+// articleRouter.patch("/like", likeArticle);
 
 export default articleRouter;

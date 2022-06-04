@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import FuzzySearch from "fuzzy-search";
 import { client } from "../server";
+
+const take = 8;
 
 export const createArticle = async (req: Request, res: Response) => {
   const { title, content } = req.body;
@@ -19,7 +20,7 @@ export const createArticle = async (req: Request, res: Response) => {
       },
     });
 
-    return res.json(article);
+    return res.json({ article });
   } catch {
     return res.json({ article: null });
   }
@@ -36,7 +37,7 @@ export const updateArticle = async (req: Request, res: Response) => {
       },
     });
 
-    return res.json(article);
+    return res.json({ article });
   } catch {
     return res.json({ article: null });
   }
@@ -56,30 +57,68 @@ export const deleteArticle = async (req: Request, res: Response) => {
 };
 
 export const readArticle = async (req: Request, res: Response) => {
-  const { id } = req.body;
+  const { id } = req.params;
   try {
     const article = await client.article.findUnique({
-      where: { id },
+      where: { id: Number(id) },
+      include: {
+        likes: true,
+      },
     });
-    return res.json(article);
+    return res.json({ article });
   } catch {
     return res.json({ article: null });
   }
 };
 
-export const searchArticle = async (req: Request, res: Response) => {
-  const { type, value } = req.query;
+export const readArticles = async (req: Request, res: Response) => {
+  const { page } = req.body;
   try {
-    const article = await client.article.findMany({
+    const articles = await client.article.findMany({
+      skip: page,
+      take,
       orderBy: {
         id: "desc",
       },
+      include: {
+        likes: true,
+      },
     });
-    const searcher = new FuzzySearch(article, [type as string], {
-      caseSensitive: true,
+    const count = await client.article.count();
+    const lastPage = Math.ceil(count / take);
+    return res.json({ articles, lastPage });
+  } catch {
+    return res.json({ articles: null });
+  }
+};
+
+export const searchArticle = async (req: Request, res: Response) => {
+  let { type, value } = req.query;
+
+  const { page } = req.body;
+  try {
+    let finder: { [key: string]: any } = {};
+    if (typeof type === "string") {
+      finder[type] = value;
+    }
+
+    const articles = await client.article.findMany({
+      orderBy: {
+        id: "desc",
+      },
+      where: finder,
+      skip: page,
+      take,
+      include: {
+        likes: true,
+      },
     });
-    const result = searcher.search(value as string);
-    return res.json({ articles: result });
+    const count = await client.article.count({
+      where: finder,
+    });
+    const lastPage = Math.ceil(count / take);
+
+    return res.json({ articles, lastPage });
   } catch {
     return res.json({ articles: null });
   }
