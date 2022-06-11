@@ -4,17 +4,18 @@ import { client } from "../server";
 
 export const loginUser = async (req: Request, res: Response) => {
   const { code } = req.body;
+  console.log(code);
   try {
     const {
       data: { access_token },
     } = await axios.post(
-      `https://oauth2.googleapis.com/token?code=${code}&client_id=${process.env.GOOGLE_CLIENT_ID}&client_secret=${process.env.GOOGLE_CLIENT_PASSWORD}&redirect_uri=https://bayeongen.shop/signin&grant_type=authorization_code`,
+      `https://oauth2.googleapis.com/token?code=${code}&client_id=${process.env.GOOGLE_CLIENT_ID}&client_secret=${process.env.GOOGLE_CLIENT_PASSWORD}&redirect_uri=${process.env.REDIRECT_URL}&grant_type=authorization_code`,
       {
         headers: { "content-type": "application/x-www-form-urlencoded" },
       },
       { withCredentials: true }
     );
-
+    console.log(access_token);
     const {
       data: { email, picture: img },
     } = await axios.get(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${access_token}`, {
@@ -23,11 +24,11 @@ export const loginUser = async (req: Request, res: Response) => {
         accept: "application/json",
       },
     });
-
+    console.log(email, img);
     let userInfo = await client.user.findUnique({
       where: { email },
     });
-
+    console.log(userInfo);
     if (!userInfo) {
       const nickname = Math.random()
         .toString(36)
