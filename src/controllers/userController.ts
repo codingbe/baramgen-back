@@ -4,7 +4,7 @@ import { client } from "../server";
 
 export const loginUser = async (req: Request, res: Response) => {
   const { code } = req.body;
-  console.log(code);
+
   try {
     const {
       data: { access_token },
@@ -15,7 +15,7 @@ export const loginUser = async (req: Request, res: Response) => {
       },
       { withCredentials: true }
     );
-    console.log(access_token);
+
     const {
       data: { email, picture: img },
     } = await axios.get(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${access_token}`, {
@@ -24,11 +24,11 @@ export const loginUser = async (req: Request, res: Response) => {
         accept: "application/json",
       },
     });
-    console.log(email, img);
+
     let userInfo = await client.user.findUnique({
       where: { email },
     });
-    console.log(userInfo);
+
     if (!userInfo) {
       const nickname = Math.random()
         .toString(36)
