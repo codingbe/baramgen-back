@@ -16,6 +16,8 @@ export const createTypeList = (arr: Boss[]) => {
       name.push(data.name);
     }
   });
-
+  maps.sort();
+  item.sort();
+  name.sort();
   return { maps, item, name };
 };
