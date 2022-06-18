@@ -14,6 +14,7 @@ model Article {
   id        Int       @id @default(autoincrement())
   title     String
   content   String
+  category  String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -24,6 +25,7 @@ model Article {
 
 model User {
   id        Int       @id @default(autoincrement())
+  authority Boolean   @default(false)
   email     String    @unique
   nickname  String    @unique
   img       String

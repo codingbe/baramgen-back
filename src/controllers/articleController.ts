@@ -4,7 +4,7 @@ import { client } from "../server";
 const take = 8;
 
 export const createArticle = async (req: Request, res: Response) => {
-  const { title, content } = req.body;
+  const { title, content, category } = req.body;
   try {
     const userInfo = res.locals.userInfo;
 
@@ -12,6 +12,7 @@ export const createArticle = async (req: Request, res: Response) => {
       data: {
         title,
         content,
+        category,
         user: {
           connect: {
             id: userInfo.id,
@@ -72,14 +73,24 @@ export const readArticle = async (req: Request, res: Response) => {
 };
 
 export const readArticles = async (req: Request, res: Response) => {
-  const { page } = req.body;
+  const { page, category, sortMethod } = req.body;
+  let sort: any = { id: "desc" };
+
+  if (sortMethod === "like") {
+    sort = {
+      likes: {
+        _count: "desc",
+      },
+    };
+  }
   try {
     const articles = await client.article.findMany({
       skip: page,
       take,
-      orderBy: {
-        id: "desc",
+      where: {
+        category,
       },
+      orderBy: sort,
       include: {
         likes: true,
       },
@@ -95,11 +106,12 @@ export const readArticles = async (req: Request, res: Response) => {
 export const searchArticle = async (req: Request, res: Response) => {
   let { type, value } = req.query;
 
-  const { page } = req.body;
+  const { page, category } = req.body;
   try {
     let finder: { [key: string]: any } = {};
     if (typeof type === "string") {
       finder[type] = value;
+      finder["category"] = category;
     }
 
     const articles = await client.article.findMany({
