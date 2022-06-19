@@ -79,7 +79,7 @@ export const deleteArticle = async (req: Request, res: Response) => {
 };
 
 export const readArticles = async (req: Request, res: Response) => {
-  const { page, sortMethod } = req.body;
+  const { page, sortMethod } = req.query;
   let sort: any = { id: "desc" };
 
   if (sortMethod === "like") {
@@ -91,7 +91,7 @@ export const readArticles = async (req: Request, res: Response) => {
   }
   try {
     const articles = await client.article.findMany({
-      skip: page,
+      skip: Number(page),
       take,
       orderBy: sort,
       include: {
@@ -110,9 +110,8 @@ export const readArticles = async (req: Request, res: Response) => {
 };
 
 export const searchArticle = async (req: Request, res: Response) => {
-  let { type, value } = req.query;
+  const { type, value, page } = req.query;
 
-  const { page } = req.body;
   try {
     let finder: { [key: string]: any } = {};
     if (typeof type === "string") {
@@ -124,7 +123,7 @@ export const searchArticle = async (req: Request, res: Response) => {
         id: "desc",
       },
       where: finder,
-      skip: page,
+      skip: Number(page),
       take,
       include: {
         likes: true,
