@@ -95,7 +95,7 @@ export const readArticles = async (req: Request, res: Response) => {
 
   try {
     const articles = await client.article.findMany({
-      skip: Number(page),
+      skip: Number(page) * take,
       take,
       where: category,
       orderBy: sort,
@@ -132,7 +132,7 @@ export const searchArticle = async (req: Request, res: Response) => {
         id: "desc",
       },
       where: finder,
-      skip: Number(page),
+      skip: Number(page) * take,
       take,
       include: {
         likes: true,
