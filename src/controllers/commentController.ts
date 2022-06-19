@@ -22,7 +22,8 @@ export const createComment = async (req: Request, res: Response) => {
     });
 
     return res.json({ comment });
-  } catch {
+  } catch (e) {
+    console.log(e);
     return res.json({ comment: false });
   }
 };
@@ -43,7 +44,8 @@ export const updateComment = async (req: Request, res: Response) => {
     });
 
     return res.json({ comment });
-  } catch {
+  } catch (e) {
+    console.log(e);
     return res.json({ comment: false });
   }
 };
@@ -61,7 +63,8 @@ export const deleteComment = async (req: Request, res: Response) => {
     });
 
     return res.json({ comment });
-  } catch {
+  } catch (e) {
+    console.log(e);
     return res.json({ comment: false });
   }
 };
