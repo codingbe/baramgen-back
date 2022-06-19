@@ -96,6 +96,8 @@ export const readArticles = async (req: Request, res: Response) => {
       orderBy: sort,
       include: {
         likes: true,
+        user: true,
+        Comments: true,
       },
     });
     const count = await client.article.count();
@@ -126,6 +128,8 @@ export const searchArticle = async (req: Request, res: Response) => {
       take,
       include: {
         likes: true,
+        user: true,
+        Comments: true,
       },
     });
     const count = await client.article.count({
