@@ -79,9 +79,8 @@ export const deleteArticle = async (req: Request, res: Response) => {
 };
 
 export const readArticles = async (req: Request, res: Response) => {
-  const { page, sortMethod } = req.body;
+  const { page, sortMethod, categoryDivision } = req.query;
   let sort: any = { id: "desc" };
-
   if (sortMethod === "like") {
     sort = {
       likes: {
@@ -89,13 +88,21 @@ export const readArticles = async (req: Request, res: Response) => {
       },
     };
   }
+  let category = {};
+  if (categoryDivision) {
+    category = { category: categoryDivision };
+  }
+
   try {
     const articles = await client.article.findMany({
-      skip: page,
+      skip: Number(page),
       take,
+      where: category,
       orderBy: sort,
       include: {
         likes: true,
+        user: true,
+        Comments: true,
       },
     });
     const count = await client.article.count();
@@ -108,13 +115,16 @@ export const readArticles = async (req: Request, res: Response) => {
 };
 
 export const searchArticle = async (req: Request, res: Response) => {
-  let { type, value } = req.query;
+  const { type, value, page, categoryDivision } = req.query;
 
-  const { page } = req.body;
   try {
     let finder: { [key: string]: any } = {};
+
     if (typeof type === "string") {
       finder[type] = value;
+    }
+    if (categoryDivision) {
+      finder["category"] = categoryDivision;
     }
 
     const articles = await client.article.findMany({
@@ -122,10 +132,12 @@ export const searchArticle = async (req: Request, res: Response) => {
         id: "desc",
       },
       where: finder,
-      skip: page,
+      skip: Number(page),
       take,
       include: {
         likes: true,
+        user: true,
+        Comments: true,
       },
     });
     const count = await client.article.count({
