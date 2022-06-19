@@ -3,7 +3,6 @@ import {
   createArticle,
   deleteArticle,
   // likeArticle,
-  readArticle,
   readArticles,
   searchArticle,
   updateArticle,
@@ -15,7 +14,6 @@ articleRouter.post("/", createArticle);
 articleRouter.patch("/", updateArticle);
 articleRouter.delete("/", deleteArticle);
 articleRouter.get("/search", searchArticle);
-articleRouter.get("/:id", readArticle);
 articleRouter.get("/", readArticles);
 // articleRouter.patch("/like", likeArticle);
 

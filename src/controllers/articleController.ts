@@ -22,7 +22,8 @@ export const createArticle = async (req: Request, res: Response) => {
     });
 
     return res.json({ article });
-  } catch {
+  } catch (e) {
+    console.log(e);
     return res.json({ article: null });
   }
 };
@@ -39,41 +40,46 @@ export const updateArticle = async (req: Request, res: Response) => {
     });
 
     return res.json({ article });
-  } catch {
+  } catch (e) {
+    console.log(e);
     return res.json({ article: null });
   }
 };
 
 export const deleteArticle = async (req: Request, res: Response) => {
-  const { id } = req.body;
+  let { id } = req.body;
+  id = Number(id);
+  const userInfo = res.locals.userInfo;
   try {
-    await client.article.delete({
-      where: { id },
-    });
-
-    return res.json({ ok: true });
-  } catch {
+    if (userInfo) {
+      //로그인 상태 확인
+      if (userInfo?.authority) {
+        await client.article.delete({
+          where: { id },
+        });
+      } else {
+        const articleInfo = await client.article.findUnique({
+          where: { id },
+          include: { user: true },
+        });
+        if (articleInfo?.userId === userInfo.id) {
+          await client.article.delete({
+            where: { id },
+          });
+        }
+      }
+      return res.json({ ok: true });
+    } else {
+      return res.json({ ok: false });
+    }
+  } catch (e) {
+    console.log(e);
     return res.json({ ok: false });
   }
 };
 
-export const readArticle = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  try {
-    const article = await client.article.findUnique({
-      where: { id: Number(id) },
-      include: {
-        likes: true,
-      },
-    });
-    return res.json({ article });
-  } catch {
-    return res.json({ article: null });
-  }
-};
-
 export const readArticles = async (req: Request, res: Response) => {
-  const { page, category, sortMethod } = req.body;
+  const { page, sortMethod } = req.body;
   let sort: any = { id: "desc" };
 
   if (sortMethod === "like") {
@@ -87,9 +93,6 @@ export const readArticles = async (req: Request, res: Response) => {
     const articles = await client.article.findMany({
       skip: page,
       take,
-      where: {
-        category,
-      },
       orderBy: sort,
       include: {
         likes: true,
@@ -98,7 +101,8 @@ export const readArticles = async (req: Request, res: Response) => {
     const count = await client.article.count();
     const lastPage = Math.ceil(count / take);
     return res.json({ articles, lastPage });
-  } catch {
+  } catch (e) {
+    console.log(e);
     return res.json({ articles: null });
   }
 };
@@ -106,12 +110,11 @@ export const readArticles = async (req: Request, res: Response) => {
 export const searchArticle = async (req: Request, res: Response) => {
   let { type, value } = req.query;
 
-  const { page, category } = req.body;
+  const { page } = req.body;
   try {
     let finder: { [key: string]: any } = {};
     if (typeof type === "string") {
       finder[type] = value;
-      finder["category"] = category;
     }
 
     const articles = await client.article.findMany({
@@ -131,7 +134,8 @@ export const searchArticle = async (req: Request, res: Response) => {
     const lastPage = Math.ceil(count / take);
 
     return res.json({ articles, lastPage });
-  } catch {
+  } catch (e) {
+    console.log(e);
     return res.json({ articles: null });
   }
 };
@@ -161,7 +165,8 @@ export const likeArticle = async (req: Request, res: Response) => {
         return res.json({ like: true });
       }
     }
-  } catch {
+  } catch (e) {
+    console.log(e);
     return res.json({ like: false });
   }
 };

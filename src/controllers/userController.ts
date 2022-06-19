@@ -17,12 +17,15 @@ export const loginUser = async (req: Request, res: Response) => {
 
     const {
       data: { email, picture: img },
-    } = await axios.get(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${access_token}`, {
-      headers: {
-        authorization: `token ${access_token}`,
-        accept: "application/json",
-      },
-    });
+    } = await axios.get(
+      `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${access_token}`,
+      {
+        headers: {
+          authorization: `token ${access_token}`,
+          accept: "application/json",
+        },
+      }
+    );
 
     let userInfo = await client.user.findUnique({
       where: { email },
@@ -40,7 +43,8 @@ export const loginUser = async (req: Request, res: Response) => {
     }
 
     return res.json({ token: access_token });
-  } catch {
+  } catch (e) {
+    console.log(e);
     return res.json({ token: null });
   }
 };
@@ -48,7 +52,8 @@ export const loginUser = async (req: Request, res: Response) => {
 export const readUser = async (req: Request, res: Response) => {
   try {
     return res.json({ userInfo: res.locals.userInfo });
-  } catch {
+  } catch (e) {
+    console.log(e);
     return res.json({ userInfo: null });
   }
 };
@@ -60,7 +65,8 @@ export const deleteUser = async (req: Request, res: Response) => {
     });
 
     return res.json({ ok: true });
-  } catch {
+  } catch (e) {
+    console.log(e);
     return res.json({ ok: false });
   }
 };
@@ -77,7 +83,8 @@ export const updateUser = async (req: Request, res: Response) => {
       },
     });
     return res.json({ userInfo: updatedUser });
-  } catch {
+  } catch (e) {
+    console.log(e);
     return res.json({ userInfo: null });
   }
 };
