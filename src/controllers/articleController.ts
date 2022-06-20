@@ -79,7 +79,7 @@ export const deleteArticle = async (req: Request, res: Response) => {
 };
 
 export const readArticles = async (req: Request, res: Response) => {
-  const { page, sortMethod, categoryDivision } = req.query;
+  const { type, value, page, categoryDivision, sortMethod } = req.query;
   let sort: any = { id: "desc" };
   if (sortMethod === "like") {
     sort = {
@@ -88,35 +88,6 @@ export const readArticles = async (req: Request, res: Response) => {
       },
     };
   }
-  let category = {};
-  if (categoryDivision) {
-    category = { category: categoryDivision };
-  }
-
-  try {
-    const articles = await client.article.findMany({
-      skip: Number(page) * take,
-      take,
-      where: category,
-      orderBy: sort,
-      include: {
-        likes: true,
-        user: true,
-        Comments: true,
-      },
-    });
-    const count = await client.article.count();
-    const lastPage = Math.ceil(count / take);
-    return res.json({ articles, lastPage });
-  } catch (e) {
-    console.log(e);
-    return res.json({ articles: null });
-  }
-};
-
-export const searchArticle = async (req: Request, res: Response) => {
-  const { type, value, page, categoryDivision } = req.query;
-
   try {
     let finder: { [key: string]: any } = {};
 
@@ -128,9 +99,7 @@ export const searchArticle = async (req: Request, res: Response) => {
     }
 
     const articles = await client.article.findMany({
-      orderBy: {
-        id: "desc",
-      },
+      orderBy: sort,
       where: finder,
       skip: Number(page) * take,
       take,
