@@ -4,13 +4,12 @@ import { client } from "../server";
 const take = 8;
 
 export const createArticle = async (req: Request, res: Response) => {
-  const { title, content, category } = req.body;
+  const { content, category } = req.body;
   try {
     const userInfo = res.locals.userInfo;
 
     const article = await client.article.create({
       data: {
-        title,
         content,
         category,
         user: {
@@ -29,13 +28,13 @@ export const createArticle = async (req: Request, res: Response) => {
 };
 
 export const updateArticle = async (req: Request, res: Response) => {
-  const { id, title, content } = req.body;
+  const { id, content, category } = req.body;
   try {
     const article = await client.article.update({
       where: { id },
       data: {
-        title,
         content,
+        category,
       },
     });
 
@@ -106,7 +105,7 @@ export const readArticles = async (req: Request, res: Response) => {
       include: {
         likes: true,
         user: true,
-        Comments: true,
+        comments: true,
       },
     });
     const count = await client.article.count({
