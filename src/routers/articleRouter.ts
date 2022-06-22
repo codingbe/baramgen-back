@@ -2,7 +2,7 @@ import express, { Router } from "express";
 import {
   createArticle,
   deleteArticle,
-  // likeArticle,
+  likeArticle,
   readArticles,
   updateArticle,
 } from "../controllers/articleController";
@@ -13,6 +13,6 @@ articleRouter.post("/", createArticle);
 articleRouter.patch("/", updateArticle);
 articleRouter.delete("/", deleteArticle);
 articleRouter.get("/", readArticles);
-// articleRouter.patch("/like", likeArticle);
+articleRouter.patch("/like", likeArticle);
 
 export default articleRouter;

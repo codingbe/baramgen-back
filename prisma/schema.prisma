@@ -30,7 +30,7 @@ model User {
   img       String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  Articles  Article[]
+  articles  Article[]
   comments  Comment[]
   likes     Like[]
 }

@@ -79,6 +79,7 @@ export const deleteArticle = async (req: Request, res: Response) => {
 
 export const readArticles = async (req: Request, res: Response) => {
   const { type, value, page, categoryDivision, sortMethod } = req.query;
+
   let sort: any = { id: "desc" };
   if (sortMethod === "like") {
     sort = {
@@ -91,7 +92,7 @@ export const readArticles = async (req: Request, res: Response) => {
     let finder: { [key: string]: any } = {};
 
     if (typeof type === "string") {
-      finder[type] = value;
+      finder[type] = { contains: value };
     }
     if (categoryDivision) {
       finder["category"] = categoryDivision;
@@ -131,22 +132,21 @@ export const likeArticle = async (req: Request, res: Response) => {
       });
 
       if (liked.length) {
-        await client.like.deleteMany({ where: { userId: userInfo.id, articleId } });
-
-        return res.json({ like: true });
+        const likeInfo = await client.like.deleteMany({ where: { userId: userInfo.id, articleId } });
+        return res.json({ like: false, likeInfo });
       } else {
-        await client.like.create({
+        const likeInfo = await client.like.create({
           data: {
             article: { connect: { id: articleId } },
             user: { connect: { id: userInfo.id } },
           },
         });
 
-        return res.json({ like: true });
+        return res.json({ like: true, likeInfo });
       }
     }
   } catch (e) {
     console.log(e);
-    return res.json({ like: false });
+    return res.json({ like: false, likeInfo: null });
   }
 };
