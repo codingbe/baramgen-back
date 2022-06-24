@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nodemon --exec ts-node src/server.ts",
     "build": "rm -rf ./built && npx tsc",
-    "migrate": "prisma migrate dev",
+    "migrate": "prisma migrate deploy",
     "studio": "prisma studio",
     "start": "node ./built/server.js"
   },
