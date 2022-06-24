@@ -18,7 +18,7 @@ model Article {
   updatedAt DateTime  @updatedAt
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
-  Comments  Comment[]
+  comments  Comment[]
   likes     Like[]
 }
 
@@ -30,8 +30,8 @@ model User {
   img       String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  Articles  Article[]
-  Comments  Comment[]
+  articles  Article[]
+  comments  Comment[]
   likes     Like[]
 }
 

@@ -4,13 +4,12 @@ import { client } from "../server";
 const take = 8;
 
 export const createArticle = async (req: Request, res: Response) => {
-  const { title, content, category } = req.body;
+  const { content, category } = req.body;
   try {
     const userInfo = res.locals.userInfo;
 
     const article = await client.article.create({
       data: {
-        title,
         content,
         category,
         user: {
@@ -29,13 +28,13 @@ export const createArticle = async (req: Request, res: Response) => {
 };
 
 export const updateArticle = async (req: Request, res: Response) => {
-  const { id, title, content } = req.body;
+  const { id, content, category } = req.body;
   try {
     const article = await client.article.update({
       where: { id },
       data: {
-        title,
         content,
+        category,
       },
     });
 
@@ -80,6 +79,7 @@ export const deleteArticle = async (req: Request, res: Response) => {
 
 export const readArticles = async (req: Request, res: Response) => {
   const { type, value, page, categoryDivision, sortMethod } = req.query;
+
   let sort: any = { id: "desc" };
   if (sortMethod === "like") {
     sort = {
@@ -92,7 +92,7 @@ export const readArticles = async (req: Request, res: Response) => {
     let finder: { [key: string]: any } = {};
 
     if (typeof type === "string") {
-      finder[type] = value;
+      finder[type] = { contains: value };
     }
     if (categoryDivision) {
       finder["category"] = categoryDivision;
@@ -106,7 +106,7 @@ export const readArticles = async (req: Request, res: Response) => {
       include: {
         likes: true,
         user: true,
-        Comments: true,
+        comments: true,
       },
     });
     const count = await client.article.count({
@@ -132,22 +132,21 @@ export const likeArticle = async (req: Request, res: Response) => {
       });
 
       if (liked.length) {
-        await client.like.deleteMany({ where: { userId: userInfo.id, articleId } });
-
-        return res.json({ like: true });
+        const likeInfo = await client.like.deleteMany({ where: { userId: userInfo.id, articleId } });
+        return res.json({ like: false, likeInfo });
       } else {
-        await client.like.create({
+        const likeInfo = await client.like.create({
           data: {
             article: { connect: { id: articleId } },
             user: { connect: { id: userInfo.id } },
           },
         });
 
-        return res.json({ like: true });
+        return res.json({ like: true, likeInfo });
       }
     }
   } catch (e) {
     console.log(e);
-    return res.json({ like: false });
+    return res.json({ like: false, likeInfo: null });
   }
 };
