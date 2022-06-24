@@ -6,7 +6,8 @@
     "dev": "nodemon --exec ts-node src/server.ts",
     "build": "rm -rf ./built && npx tsc",
     "migrate": "prisma migrate dev",
-    "studio": "prisma studio"
+    "studio": "prisma studio",
+    "start": "node ./built/server.js"
   },
   "repository": {
     "type": "git",

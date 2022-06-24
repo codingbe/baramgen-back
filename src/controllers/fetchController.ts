@@ -6,7 +6,7 @@ import { client } from "../server";
 export async function renderHome(req: Request, res: Response) {
   const contents = `<html>
   <body>
-  <form action="/data" method="POST" enctype="multipart/form-data">
+  <form action="/fetch" method="POST" enctype="multipart/form-data">
   <input type="file" name="xlsx" />
   <input type="submit" />
   </form>
