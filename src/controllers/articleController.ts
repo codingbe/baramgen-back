@@ -106,7 +106,11 @@ export const readArticles = async (req: Request, res: Response) => {
       include: {
         likes: true,
         user: true,
-        comments: true,
+        comments: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
     const count = await client.article.count({
