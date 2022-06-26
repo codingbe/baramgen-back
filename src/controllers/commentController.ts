@@ -4,6 +4,7 @@ import { client } from "../server";
 export const createComment = async (req: Request, res: Response) => {
   const userInfo = res.locals.userInfo;
   const { articleId, content } = req.body;
+
   try {
     const comment = await client.comment.create({
       data: {
@@ -19,9 +20,20 @@ export const createComment = async (req: Request, res: Response) => {
         },
         content,
       },
+      include: {
+        article: {
+          include: {
+            comments: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
     });
 
-    return res.json({ comment });
+    return res.json({ comments: comment.article.comments });
   } catch (e) {
     console.log(e);
     return res.json({ comment: false });
@@ -55,16 +67,24 @@ export const deleteComment = async (req: Request, res: Response) => {
 
   const { commentId } = req.body;
   try {
-    const comment = await client.comment.deleteMany({
-      where: {
-        userId: userInfo.id,
-        id: commentId,
-      },
-    });
+    if (userInfo.authority) {
+      await client.comment.deleteMany({
+        where: {
+          id: commentId,
+        },
+      });
+    } else {
+      await client.comment.deleteMany({
+        where: {
+          userId: userInfo.id,
+          id: commentId,
+        },
+      });
+    }
 
-    return res.json({ comment });
+    return res.json({ ok: true });
   } catch (e) {
     console.log(e);
-    return res.json({ comment: false });
+    return res.json({ ok: false });
   }
 };

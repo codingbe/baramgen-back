@@ -6,7 +6,7 @@ export const loginUser = async (req: Request, res: Response) => {
   const { code } = req.body;
   try {
     const {
-      data: { access_token },
+      data: { access_token, expires_in },
     } = await axios.post(
       `https://oauth2.googleapis.com/token?code=${code}&client_id=${process.env.GOOGLE_CLIENT_ID}&client_secret=${process.env.GOOGLE_CLIENT_PASSWORD}&redirect_uri=http://localhost:3000/signin&grant_type=authorization_code`,
       {
@@ -17,15 +17,12 @@ export const loginUser = async (req: Request, res: Response) => {
 
     const {
       data: { email, picture: img },
-    } = await axios.get(
-      `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${access_token}`,
-      {
-        headers: {
-          authorization: `token ${access_token}`,
-          accept: "application/json",
-        },
-      }
-    );
+    } = await axios.get(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${access_token}`, {
+      headers: {
+        authorization: `token ${access_token}`,
+        accept: "application/json",
+      },
+    });
 
     let userInfo = await client.user.findUnique({
       where: { email },
@@ -42,7 +39,7 @@ export const loginUser = async (req: Request, res: Response) => {
       });
     }
 
-    return res.json({ token: access_token });
+    return res.json({ token: access_token, expire: expires_in * 1000 });
   } catch (e) {
     console.log(e);
     return res.json({ token: null });
